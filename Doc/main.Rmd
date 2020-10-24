@@ -1,0 +1,40 @@
+---
+title: "Choose an informative title for your coursework project"
+author: "student-id-numbers"
+date: "2020-10-20"
+output: pdf_document
+bibliography: bibliography.bib
+---
+
+# Introduction
+
+Here is an example reference [@Abrams2005].
+
+# Methods
+
+My text
+
+My model
+$$ y_i = \beta_0 + \beta_1x_i + \varepsilon_i,\  \varepsilon_i \sim N(0, \sigma^2) $$
+
+# Results
+
+```{r, include = FALSE}
+mydata <- read.csv("mydata.csv")
+model <- lm(y ~ x, data = mydata)
+summary(model)
+```
+
+# Conclusion
+
+# References 
+
+<div id="refs">
+</div>
+
+# Appendix of R code
+
+```{r, eval=FALSE}
+mydata <- read.csv("mydata.csv")
+model <- lm(y ~ x, data = mydata)
+```

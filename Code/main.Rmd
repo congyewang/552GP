@@ -1,0 +1,176 @@
+---
+title: "Main"
+---
+
+# import package
+``` {r eval=FALSE}
+library(tidyverse)
+library(nortest)
+library(mvnormtest)
+```
+
+# load &clean data
+```{r}
+df <- read.table("../Data/neomod_isam12.dat", header = TRUE)
+```
+
+# convert to factor variable
+```{r}
+out_of_convert_list <- c("bwt", "los")
+classification_list <- c(setdiff(names(df), out_of_convert_list))
+for (i in classification_list) {
+
+  cmd <- paste("df$", i, " <- factor(df$", i, ")", sep = "")
+  eval(parse(text = cmd))
+
+}
+```
+
+# Data normality and homogeneity of variance in exploratory analysis
+
+
+## 1. Normality and variance homogeneity test of variables with unclassified situation
+
+### Q-Q plot
+```{r}
+qqnorm(df$bwt, main = "df$bwt Normal Q-Q Plot"); qqline(df$bwt, col = 2)
+```
+
+```{r}
+qqnorm(df$los, main = "df$los Normal Q-Q Plot"); qqline(df$los, col = 2)
+```
+
+The two plots demonstrate that the data obey normal distribution approximately.
+
+### Normality test
+```{r}
+lillie.test(df$bwt)
+lillie.test(df$los)
+df_subset <- df %>% select(bwt, los)
+matrix_subset <- t(as.matrix(df_subset))
+mshapiro.test(matrix_subset)
+```
+All of the p-value show that bwt and los are not normal distributions.
+
+### variance homogeneity test
+```{r}
+bartlett.test(df$bwt, df$re.ad)
+bartlett.test(df$los, df$re.ad)
+```
+Both of the result shows that there are no significant difference in variance. However, the Cochran and Bartlett tests are sensitive to non normality.
+
+## 2. Normality and variance homogeneity test of variables with classified situation
+
+### split dataset
+```{r}
+out_of_convert_list <- c("bwt", "los")
+classification_list <- c(setdiff(names(df), out_of_convert_list))
+subset_str_list <- c()
+for (i in 1:length(classification_list)) {
+
+  cmd <- paste("df_", classification_list[i], " <- split(df, df$", classification_list[i], ")", sep = "")
+  eval(parse(text = cmd))
+
+  subset_str_list[i] <- paste("df_", classification_list[i], sep = "")
+
+}
+subset_str_list
+```
+### Q-Q plot
+```{r}
+for (i in subset_str_list) {
+
+  temp <- eval(parse(text = i))
+
+  for (j in names(temp)) {
+    
+    sub_set_bwt_name <- paste(i, "$", j, "$bwt", sep = "")
+    cmd_bwt <- paste("qqnorm(", i, "$'", j, "'", "$bwt, ", "main = '", sub_set_bwt_name, "'); qqline(", i, "$'", j, "'", "$bwt, col = 2)", sep = "")
+    eval(parse(text = cmd_bwt))
+    
+    sub_set_los_name <- paste(i, "$", j, "$los", sep = "")
+    cmd_los <- paste("qqnorm(", i, "$'", j, "'", "$los, ", "main = '", sub_set_los_name, "'); qqline(", i, "$'", j, "'", "$los, col = 2)", sep = "")
+    eval(parse(text = cmd_los))
+
+  }
+}
+```
+### Normality test
+
+```{r}
+out_of_convert_list <- c("bwt", "los")
+classification_list <- c(setdiff(names(df), out_of_convert_list))
+
+for (i in 1:length(classification_list)) {
+
+  layer_1 <- paste("df$", classification_list[i], sep = "")
+  cmd_1 <- paste("df_", classification_list[i], " <- split(df, df$", classification_list[i], ")", sep = "")
+  tmp_1 <- eval(parse(text = cmd_1))
+  layer_2_names <- names(tmp_1)
+
+  cmd_2_list <- paste(classification_list[i], "_list ", "<- c()", sep = "")
+  eval(parse(text = cmd_2_list))
+
+  for (j in layer_2_names) {
+
+    cmd_2 <- paste(classification_list[i], "_list ", " <- c(", classification_list[i], "_list, ", j, ")", sep = "")
+    eval(parse(text = cmd_2))
+    
+  }
+
+}
+
+n <- 1
+  for (a in accom_list) {
+    for (b in cns_list) {
+      for (c in edu_list) {
+        for (d in emp.f_list) {
+          for (e in emp.m_list) {
+            for (f in gest_list) {
+              for (g in re.ad_list) {
+                for (h in sex_list) {
+                  for (i in size_list) {
+                    try({
+                      multi_matrix <- matrix(c(df[df$accom == a & df$cns == b & df$edu == c & df$emp.f == d & df$emp.m == e &df$gest == f & df$re.ad == g & df$sex == h & df$size == i, ]$bwt, df[df$accom == a & df$cns == b & df$edu == c & df$emp.f == d & df$emp.m == e &df$gest == f & df$re.ad == g & df$sex == h & df$size == i, ]$los), nrow = 2, ncol = length(df[df$accom == a & df$cns == b & df$edu == c & df$emp.f == d & df$emp.m == e &df$gest == f & df$re.ad == g & df$sex == h & df$size == i, ]$bwt))
+                                        
+                      p <- mshapiro.test(multi_matrix)$p.value
+
+                      if (p < 0.0500) {
+                        cat(
+                          "\n\n",
+                          "#############################",
+                          "\n",
+                          "No.", n, 
+                          "accom:", a, "\n", 
+                          "cns:", b, "\n", 
+                          "edu:", c, "\n",
+                          "emp.f:", d, "\n",
+                          "emp.m:", e, "\n",
+                          "gest:", f, "\n",
+                          "re.ad:", g, "\n",
+                          "sex:", h, "\n",
+                          "size:", i, "\n",
+                          "p-value:", p, "\n",
+                          "#############################",
+                          "\n\n"
+                          )
+                          n = n + 1
+                      }
+                      else {
+                        
+                        next
+                        
+                      }
+
+                    }, silent = TRUE)
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+```
+As a result, the above data do not satisfy the normal distribution.
