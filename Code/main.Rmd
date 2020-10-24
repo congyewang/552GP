@@ -12,6 +12,7 @@ library(mvnormtest)
 # load &clean data
 ```{r}
 df <- read.table("../Data/neomod_isam12.dat", header = TRUE)
+# reading is standard, no issues
 ```
 
 # convert to factor variable
@@ -19,12 +20,17 @@ df <- read.table("../Data/neomod_isam12.dat", header = TRUE)
 out_of_convert_list <- c("bwt", "los")
 classification_list <- c(setdiff(names(df), out_of_convert_list))
 for (i in classification_list) {
-
+  # I do not understand the inner workings of this statement
+  # Why factor, paste, parse eval? What is the purpose of it? How does it work?
   cmd <- paste("df$", i, " <- factor(df$", i, ")", sep = "")
   eval(parse(text = cmd))
-
 }
+# I really do not understand the way this works
+# Additionally, I believe this command has the same effect
+sizes = factor(df$size)
+as.numeric(sizes)
 ```
+
 
 # Data normality and homogeneity of variance in exploratory analysis
 
@@ -34,21 +40,25 @@ for (i in classification_list) {
 ### Q-Q plot
 ```{r}
 qqnorm(df$bwt, main = "df$bwt Normal Q-Q Plot"); qqline(df$bwt, col = 2)
+# What is purpose of this graph?
 ```
 
 ```{r}
 qqnorm(df$los, main = "df$los Normal Q-Q Plot"); qqline(df$los, col = 2)
+# What is purpose of this graph?
 ```
 
 The two plots demonstrate that the data obey normal distribution approximately.
 
 ### Normality test
+
 ```{r}
 lillie.test(df$bwt)
 lillie.test(df$los)
 df_subset <- df %>% select(bwt, los)
 matrix_subset <- t(as.matrix(df_subset))
 mshapiro.test(matrix_subset)
+# What are all these tests for? I do not know what anything does below here 
 ```
 All of the p-value show that bwt and los are not normal distributions.
 
