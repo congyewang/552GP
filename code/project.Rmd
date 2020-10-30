@@ -1,0 +1,95 @@
+---
+title: "MATH552 Group Project"
+author: "c.wang35@lancaster.ac.uk & k.molloy@lancaster.ac.uk"
+output:
+  html_document:
+    df_print: paged
+  html_notebook: default
+  pdf_document: default
+---
+
+
+```{r}
+neomod <- read.table("../data/neomod_isam12.dat", header = T)
+
+#plot(neomod)
+
+summary(neomod)
+
+
+# Attach to allow for better addressing
+attach(neomod)
+
+```
+
+
+# Factorisation
+Modify variables that are int or str to factor.
+```{r}
+
+
+
+neomod$cns    = factor(cns)
+neomod$size   = factor(size)
+neomod$gest   = factor(gest)
+neomod$emp.f  = factor(emp.f)
+neomod$emp.m  = factor(emp.m)
+neomod$edu    = factor(edu)
+neomod$re.ad  = factor(re.ad)
+neomod$sex    = factor(sex)
+neomod$accom  = factor(accom)
+
+
+summary(neomod)
+
+```
+```{r}
+head(neomod)
+```
+```{r}
+# Representative Model
+mod1 = glm(re.ad ~ bwt,
+          data=neomod,
+          family=binomial)
+
+
+
+summary(mod1)
+```
+
+
+```{r}
+# Representative plot
+par(mfrow=c(1,1))
+plot(neomod$bwt,
+     neomod$re.ad,
+     xlab="Baseline Count",
+     ylab="Fortnightly Count")
+abline(mod1, col=2)
+```
+
+```{r}
+# Representative plot
+plot(mod1)
+```
+
+```{r}
+# Random model - probably wrong
+mod2.re.ad = glm(re.ad ~ cns + size + gest + bwt + emp.f + emp.m + edu + sex + accom,
+           data= neomod,
+           family=binomial)
+
+summary(mod2.re.ad)
+
+plot(mod2.re.ad)
+```
+```{r}
+# Random model - probably wrong
+mod2.los = glm(los ~ cns + size + gest + bwt + emp.f + emp.m + edu + sex + accom,
+           data= neomod,
+           family=Gamma(link=inverse))
+
+summary(mod2.los)
+
+plot(mod2.los)
+```
