@@ -1,186 +1,194 @@
 ---
-title: "Main"
+title: "MATH552 Group Project"
+author: "c.wang35@lancaster.ac.uk & k.molloy@lancaster.ac.uk"
 ---
 
-# import package
-``` {r eval=FALSE}
-library(tidyverse)
-library(nortest)
-library(mvnormtest)
-```
-
-# load &clean data
-```{r}
-df <- read.table("../Data/neomod_isam12.dat", header = TRUE)
-# reading is standard, no issues
-```
-
-# convert to factor variable
-```{r}
-out_of_convert_list <- c("bwt", "los")
-classification_list <- c(setdiff(names(df), out_of_convert_list))
-for (i in classification_list) {
-  # I do not understand the inner workings of this statement
-  # Why factor, paste, parse eval? What is the purpose of it? How does it work?
-  cmd <- paste("df$", i, " <- factor(df$", i, ")", sep = "")
-  eval(parse(text = cmd))
-}
-# I really do not understand the way this works
-# Additionally, I believe this command has the same effect
-sizes = factor(df$size)
-as.numeric(sizes)
-```
-
-
-# Data normality and homogeneity of variance in exploratory analysis
-
-
-## 1. Normality and variance homogeneity test of variables with unclassified situation
-
-### Q-Q plot
-```{r}
-qqnorm(df$bwt, main = "df$bwt Normal Q-Q Plot"); qqline(df$bwt, col = 2)
-# What is purpose of this graph?
-```
 
 ```{r}
-qqnorm(df$los, main = "df$los Normal Q-Q Plot"); qqline(df$los, col = 2)
-# What is purpose of this graph?
+neomod <- read.table("../data/neomod_isam12.dat", header = T)
+
+#plot(neomod)
+
+summary(neomod)
+
+
+# Attach to allow for better addressing
+attach(neomod)
+
 ```
 
-The two plots demonstrate that the data obey normal distribution approximately.
 
-### Normality test
+# Factorisation
+Modify variables that are int or str to factor.
+```{r}
+
+
+
+neomod$cns    = factor(cns)
+neomod$size   = factor(size)
+neomod$gest   = factor(gest)
+neomod$emp.f  = factor(emp.f)
+neomod$emp.m  = factor(emp.m)
+neomod$edu    = factor(edu)
+neomod$re.ad  = factor(re.ad)
+neomod$sex    = factor(sex)
+neomod$accom  = factor(accom)
+
+
+summary(neomod)
+
+```
+```{r}
+head(neomod)
+```
+```{r}
+# Representative Model
+mod1 = glm(re.ad ~ bwt,
+          data=neomod,
+          family=binomial)
+
+
+
+summary.glm(mod1)
+```
+
 
 ```{r}
-lillie.test(df$bwt)
-lillie.test(df$los)
-df_subset <- df %>% select(bwt, los)
-matrix_subset <- t(as.matrix(df_subset))
-mshapiro.test(matrix_subset)
-# What are all these tests for? I do not know what anything does below here 
+# Representative plot
+par(mfrow=c(1,1))
+plot(neomod$bwt,
+     neomod$re.ad,
+     xlab="Baseline Count",
+     ylab="Fortnightly Count")
+abline(mod1, col=2)
 ```
-All of the p-value show that bwt and los are not normal distributions.
-
-### variance homogeneity test
-```{r}
-bartlett.test(df$bwt, df$re.ad)
-bartlett.test(df$los, df$re.ad)
-```
-Both of the result shows that there are no significant difference in variance. However, the Cochran and Bartlett tests are sensitive to non normality.
-
-## 2. Normality and variance homogeneity test of variables with classified situation
-
-### split dataset
-```{r}
-out_of_convert_list <- c("bwt", "los")
-classification_list <- c(setdiff(names(df), out_of_convert_list))
-subset_str_list <- c()
-for (i in 1:length(classification_list)) {
-
-  cmd <- paste("df_", classification_list[i], " <- split(df, df$", classification_list[i], ")", sep = "")
-  eval(parse(text = cmd))
-
-  subset_str_list[i] <- paste("df_", classification_list[i], sep = "")
-
-}
-subset_str_list
-```
-### Q-Q plot
-```{r}
-for (i in subset_str_list) {
-
-  temp <- eval(parse(text = i))
-
-  for (j in names(temp)) {
-    
-    sub_set_bwt_name <- paste(i, "$", j, "$bwt", sep = "")
-    cmd_bwt <- paste("qqnorm(", i, "$'", j, "'", "$bwt, ", "main = '", sub_set_bwt_name, "'); qqline(", i, "$'", j, "'", "$bwt, col = 2)", sep = "")
-    eval(parse(text = cmd_bwt))
-    
-    sub_set_los_name <- paste(i, "$", j, "$los", sep = "")
-    cmd_los <- paste("qqnorm(", i, "$'", j, "'", "$los, ", "main = '", sub_set_los_name, "'); qqline(", i, "$'", j, "'", "$los, col = 2)", sep = "")
-    eval(parse(text = cmd_los))
-
-  }
-}
-```
-### Normality test
 
 ```{r}
-out_of_convert_list <- c("bwt", "los")
-classification_list <- c(setdiff(names(df), out_of_convert_list))
-
-for (i in 1:length(classification_list)) {
-
-  layer_1 <- paste("df$", classification_list[i], sep = "")
-  cmd_1 <- paste("df_", classification_list[i], " <- split(df, df$", classification_list[i], ")", sep = "")
-  tmp_1 <- eval(parse(text = cmd_1))
-  layer_2_names <- names(tmp_1)
-
-  cmd_2_list <- paste(classification_list[i], "_list ", "<- c()", sep = "")
-  eval(parse(text = cmd_2_list))
-
-  for (j in layer_2_names) {
-
-    cmd_2 <- paste(classification_list[i], "_list ", " <- c(", classification_list[i], "_list, ", j, ")", sep = "")
-    eval(parse(text = cmd_2))
-    
-  }
-
-}
-
-n <- 1
-  for (a in accom_list) {
-    for (b in cns_list) {
-      for (c in edu_list) {
-        for (d in emp.f_list) {
-          for (e in emp.m_list) {
-            for (f in gest_list) {
-              for (g in re.ad_list) {
-                for (h in sex_list) {
-                  for (i in size_list) {
-                    try({
-                      multi_matrix <- matrix(c(df[df$accom == a & df$cns == b & df$edu == c & df$emp.f == d & df$emp.m == e &df$gest == f & df$re.ad == g & df$sex == h & df$size == i, ]$bwt, df[df$accom == a & df$cns == b & df$edu == c & df$emp.f == d & df$emp.m == e &df$gest == f & df$re.ad == g & df$sex == h & df$size == i, ]$los), nrow = 2, ncol = length(df[df$accom == a & df$cns == b & df$edu == c & df$emp.f == d & df$emp.m == e &df$gest == f & df$re.ad == g & df$sex == h & df$size == i, ]$bwt))
-                                        
-                      p <- mshapiro.test(multi_matrix)$p.value
-
-                      if (p < 0.0500) {
-                        cat(
-                          "\n\n",
-                          "#############################",
-                          "\n",
-                          "No.", n, 
-                          "accom:", a, "\n", 
-                          "cns:", b, "\n", 
-                          "edu:", c, "\n",
-                          "emp.f:", d, "\n",
-                          "emp.m:", e, "\n",
-                          "gest:", f, "\n",
-                          "re.ad:", g, "\n",
-                          "sex:", h, "\n",
-                          "size:", i, "\n",
-                          "p-value:", p, "\n",
-                          "#############################",
-                          "\n\n"
-                          )
-                          n = n + 1
-                      }
-                      else {
-                        
-                        next
-                        
-                      }
-
-                    }, silent = TRUE)
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
+# Representative plot
+plot(mod1)
 ```
-As a result, the above data do not satisfy the normal distribution.
+
+```{r}
+# Random model - probably wrong
+mod2.re.ad = glm(re.ad ~ cns + size + gest + bwt + emp.f + emp.m + edu + sex + accom,
+           data= neomod,
+           family=binomial)
+
+summary(mod2.re.ad)
+
+plot(mod2.re.ad)
+```
+```{r}
+# Random model - probably wrong
+mod2.los = glm(los ~ cns + size + gest + bwt + emp.f + emp.m + edu + sex + accom,
+           data= neomod,
+           family=Gamma(link=inverse))
+
+summary(mod2.los)
+
+plot(mod2.los)
+```
+
+```{r}
+mod3.los = glm(los ~ cns + size + gest + bwt + emp.f + emp.m + edu + sex + accom,
+           data= neomod,
+           family=gaussian)
+
+summary.glm(mod3.los)
+
+plot(mod3.los)
+```
+
+```{r}
+# I think it is good.
+mod4.los = glm(los ~ cns + size + gest + bwt + emp.f + emp.m + edu + sex + accom,
+           data= neomod,
+           family=inverse.gaussian)
+
+summary.glm(mod4.los)
+
+plot(mod4.los)
+```
+
+```{r}
+mod5.los = glm(los ~ cns + size + gest + bwt + emp.f + emp.m + edu + sex + accom,
+           data= neomod,
+           family=poisson)
+
+summary.glm(mod5.los)
+
+plot(mod5.los)
+```
+
+```{r}
+mod6.los = glm(los ~ cns + size + gest + bwt + emp.f + emp.m + edu + sex + accom,
+           data= neomod,
+           family=quasi)
+
+summary.glm(mod6.los)
+
+plot(mod6.los)
+```
+
+```{r}
+library(car)
+```
+
+This is an option plot.
+It can create a comprehensive diagnostic diagram. The horizontal axis represents the lever value, the vertical axis represents the student residual value, and the size of the symbol drawn is directly proportional to the Cook distance.
+  
+# Model Diagnostics
+```{r}
+influencePlot(mod5.los)
+```
+
+This can test the overdispersion. If $\phi$ is greater than 1, it needs to be considered using Quasi-likelihood. See Chapter 5 in notes.
+
+# Check Overdispersion
+$$\phi = \frac{Residual\ \ Deviation}{Residual\ Degrees\ of\ Freedom}$$
+```{r}
+deviance(mod4.los)/df.residual(mod4.los)
+```
+
+# Model selection
+
+```{r}
+# Forward
+mod.los = glm(los ~ 1,
+                data= neomod,
+                family=inverse.gaussian)
+
+mod.los.for<-step(mod4.los, scope = list(upper=~cns + size + gest + bwt + emp.f + emp.m + edu + sex + accom,lower=~1), direction = "forward")
+summary(mod.los.for)
+```
+
+```{r}
+# Backward
+mod.los <- glm(los ~ cns + size + gest + bwt + emp.f + emp.m + edu + sex + accom,
+           data= neomod,
+           family=inverse.gaussian)
+
+mod.los.back <- step(mod.los, direction="backward")
+summary(mod.los.back)
+```
+Both the forward method and the backward method have obvious shortcomings. The forward method may have such a problem: it can not reflect the changes after the introduction of new independent variable values. Because the AIC corresponding to the regression equation is the minimum when an independent variable is introduced, but when other variables are introduced, the AIC value may be smaller if it is proposed from the regression equation, but there is no chance to put forward it by using the forward method, that is, once introduced, it will be lifelong. It is obviously not comprehensive to consider only the introduction but not the elimination. Similarly, once an independent variable is eliminated in the backward method, it has no chance to re-enter the regression equation.
+```{r}
+mod.los <- glm(los ~ cns + size + gest + bwt + emp.f + emp.m + edu + sex + accom,
+           data= neomod,
+           family=inverse.gaussian)
+mod.los.step <- step(mod.los, direction="both")
+summary(mod.los.step)
+```
+
+## Model Comparison
+```{r}
+mod.los <- glm(los ~ cns + size + gest + bwt + emp.f + emp.m + edu + sex + accom,
+           data= neomod,
+           family=inverse.gaussian)
+
+mod.los.step <- glm(los ~ cns + gest + bwt + emp.m + edu + sex, 
+           data= neomod,
+           family=inverse.gaussian)
+
+anova(mod.los.step, mod.los, test = "Chisq")
+```
