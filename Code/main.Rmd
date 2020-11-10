@@ -3,7 +3,6 @@ title: "MATH552 Group Project"
 author: "c.wang35@lancaster.ac.uk & k.molloy@lancaster.ac.uk"
 ---
 
-
 ```{r}
 neomod <- read.table("../data/neomod_isam12.dat", header = T)
 
@@ -41,93 +40,41 @@ summary(neomod)
 ```{r}
 head(neomod)
 ```
-```{r}
-# Representative Model
-mod1 = glm(re.ad ~ bwt,
-          data=neomod,
-          family=binomial)
-
-
-
-summary.glm(mod1)
-```
-
 
 ```{r}
-# Representative plot
-par(mfrow=c(1,1))
-plot(neomod$bwt,
-     neomod$re.ad,
-     xlab="Baseline Count",
-     ylab="Fortnightly Count")
-abline(mod1, col=2)
-```
-
-```{r}
-# Representative plot
-plot(mod1)
-```
-
-```{r}
-# Random model - probably wrong
-mod2.re.ad = glm(re.ad ~ cns + size + gest + bwt + emp.f + emp.m + edu + sex + accom,
+mod.nolos.full <- glm(re.ad ~ . -los + cns:size + cns:gest + cns:bwt + cns:emp.f + cns:emp.m + cns:edu + cns:sex + size:gest + size:bwt + size:emp.f + size:emp.m + size:edu + size:sex + gest:bwt + gest:emp.f + gest:emp.m + gest:edu + gest:sex + bwt:emp.f + bwt:emp.m + bwt:edu + bwt:sex + emp.f:emp.m + emp.f:edu + emp.f:sex + emp.m:edu + emp.m:sex + edu:sex,
            data= neomod,
            family=binomial)
 
-summary(mod2.re.ad)
+summary(mod.nolog.full)
 
-plot(mod2.re.ad)
+plot(mod.nolog.full)
 ```
-```{r}
-# Random model - probably wrong
-mod2.los = glm(los ~ cns + size + gest + bwt + emp.f + emp.m + edu + sex + accom,
-           data= neomod,
-           family=Gamma(link=inverse))
+As a result, we may consider the interactions effect on these variables, namely cns:emp.f, size:emp.f, size:emp.m, size:edu, gest:edu, bwt:edu, emp.m:edu.
 
-summary(mod2.los)
-
-plot(mod2.los)
-```
 
 ```{r}
-mod3.los = glm(los ~ cns + size + gest + bwt + emp.f + emp.m + edu + sex + accom,
+mod.los.full <- glm(re.ad ~ . + cns:size + cns:gest + cns:bwt + cns:emp.f + cns:emp.m + cns:edu + cns:sex + size:gest + size:bwt + size:emp.f + size:emp.m + size:edu + size:sex + gest:bwt + gest:emp.f + gest:emp.m + gest:edu + gest:sex + bwt:emp.f + bwt:emp.m + bwt:edu + bwt:sex + emp.f:emp.m + emp.f:edu + emp.f:sex + emp.m:edu + emp.m:sex + edu:sex,
            data= neomod,
-           family=gaussian)
+           family=binomial)
 
-summary.glm(mod3.los)
+summary.glm(mod.log.full)
 
-plot(mod3.los)
+plot(mod.log.full)
 ```
+As a result, we may consider the los variable and interactions effect on these variables, namely cns:emp.f, size:emp.f, size:emp.m, size:edu, gest:edu, gest:sex, bwt:edu, emp.m:edu.
 
 ```{r}
-# I think it is good.
-mod4.los = glm(los ~ cns + size + gest + bwt + emp.f + emp.m + edu + sex + accom,
-           data= neomod,
-           family=inverse.gaussian)
-
-summary.glm(mod4.los)
-
-plot(mod4.los)
+anova(mod.log.full, mod.nolog.full, test = "Chisq")
 ```
+As a result, these two model are different. We may make los variable be the covariant.
 
 ```{r}
-mod5.los = glm(los ~ cns + size + gest + bwt + emp.f + emp.m + edu + sex + accom,
+mod <- glm(re.ad ~ . + cns:emp.f + size:emp.f + size:emp.m + size:edu + gest:edu + bwt:edu + emp.m:edu,
            data= neomod,
-           family=poisson)
-
-summary.glm(mod5.los)
-
-plot(mod5.los)
-```
-
-```{r}
-mod6.los = glm(los ~ cns + size + gest + bwt + emp.f + emp.m + edu + sex + accom,
-           data= neomod,
-           family=quasi)
-
-summary.glm(mod6.los)
-
-plot(mod6.los)
+           family=binomial)
+summary(mod)
+plot(mod)
 ```
 
 ```{r}
@@ -139,7 +86,7 @@ It can create a comprehensive diagnostic diagram. The horizontal axis represents
   
 # Model Diagnostics
 ```{r}
-influencePlot(mod5.los)
+influencePlot(mod)
 ```
 
 This can test the overdispersion. If $\phi$ is greater than 1, it needs to be considered using Quasi-likelihood. See Chapter 5 in notes.
@@ -147,48 +94,38 @@ This can test the overdispersion. If $\phi$ is greater than 1, it needs to be co
 # Check Overdispersion
 $$\phi = \frac{Residual\ \ Deviation}{Residual\ Degrees\ of\ Freedom}$$
 ```{r}
-deviance(mod4.los)/df.residual(mod4.los)
+deviance(mod) / df.residual(mod)
+```
+As a result, the quasibinomial is needed to be consider.
+
+```{r}
+mod.quasi <- glm(re.ad ~ . + cns:emp.f + size:emp.f + size:emp.m + size:edu + gest:edu + bwt:edu + emp.m:edu,
+           data= neomod,
+           family=quasibinomial)
+summary(mod)
+plot(mod)
 ```
 
 # Model selection
 
-```{r}
-# Forward
-mod.los = glm(los ~ 1,
-                data= neomod,
-                family=inverse.gaussian)
-
-mod.los.for<-step(mod4.los, scope = list(upper=~cns + size + gest + bwt + emp.f + emp.m + edu + sex + accom,lower=~1), direction = "forward")
-summary(mod.los.for)
-```
-
-```{r}
-# Backward
-mod.los <- glm(los ~ cns + size + gest + bwt + emp.f + emp.m + edu + sex + accom,
-           data= neomod,
-           family=inverse.gaussian)
-
-mod.los.back <- step(mod.los, direction="backward")
-summary(mod.los.back)
-```
 Both the forward method and the backward method have obvious shortcomings. The forward method may have such a problem: it can not reflect the changes after the introduction of new independent variable values. Because the AIC corresponding to the regression equation is the minimum when an independent variable is introduced, but when other variables are introduced, the AIC value may be smaller if it is proposed from the regression equation, but there is no chance to put forward it by using the forward method, that is, once introduced, it will be lifelong. It is obviously not comprehensive to consider only the introduction but not the elimination. Similarly, once an independent variable is eliminated in the backward method, it has no chance to re-enter the regression equation.
 ```{r}
-mod.los <- glm(los ~ cns + size + gest + bwt + emp.f + emp.m + edu + sex + accom,
-           data= neomod,
-           family=inverse.gaussian)
-mod.los.step <- step(mod.los, direction="both")
-summary(mod.los.step)
+library(MASS)
 ```
 
-## Model Comparison
 ```{r}
-mod.los <- glm(los ~ cns + size + gest + bwt + emp.f + emp.m + edu + sex + accom,
+mod.binomial <- glm(re.ad ~ . + cns:emp.f + size:emp.f + size:emp.m + size:edu + gest:edu + bwt:edu + emp.m:edu,
            data= neomod,
-           family=inverse.gaussian)
+           family=binomial)
+stepAIC(mod.binomial, direction = "both", trace = 1)
+```
 
-mod.los.step <- glm(los ~ cns + gest + bwt + emp.m + edu + sex, 
-           data= neomod,
-           family=inverse.gaussian)
+Therefor, the final model is as follow:
+```{r}
+model.final <- glm(formula = re.ad ~ cns + size + gest + emp.f + emp.m + edu + 
+    los + sex + accom + cns:emp.f + size:emp.f + size:edu + emp.m:edu, 
+    family = quasibinomial, data = neomod)
 
-anova(mod.los.step, mod.los, test = "Chisq")
+summary.glm(model.final)
+plot(model.final)
 ```
