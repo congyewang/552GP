@@ -1,166 +1,106 @@
----
-title: "MATH552 Group Project"
-author: "c.wang35@lancaster.ac.uk & k.molloy@lancaster.ac.uk"
----
-
 ```{r}
-neomod <- read.table("../data/neomod_isam12.dat", header = T)
-
-#plot(neomod)
-
-summary(neomod)
-
-
-# Attach to allow for better addressing
-attach(neomod)
-
-```
-
-
-# Factorisation
-Modify variables that are int or str to factor.
-```{r}
-
-
-
-neomod$cns    = factor(cns)
-neomod$size   = factor(size)
-neomod$gest   = factor(gest)
-neomod$emp.f  = factor(emp.f)
-neomod$emp.m  = factor(emp.m)
-neomod$edu    = factor(edu)
-neomod$re.ad  = factor(re.ad)
-neomod$sex    = factor(sex)
-neomod$accom  = factor(accom)
-
-
-summary(neomod)
-
-```
-```{r}
-head(neomod)
-```
-
-# Exploratory Analysis
-```{r}
-# Libraries
 library(tidyverse)
-#library(inhrbrthemes)
 library(viridis)
-
-# Plot
-neomod %>%
-  ggplot(aes(x=re.ad, y=bwt, fill=re.ad)) +
-    geom_violin() +
-    scale_fill_viridis(discrete = TRUE, alpha=0.6) +
-    geom_jitter(color="black", size=0.4, alpha=0.9) +
-    theme(
-      legend.position="none",
-      plot.title = element_text(size=11)
-    )
-
-neomod %>%
-  ggplot(aes(x=re.ad, y=los, fill=re.ad)) +
-    geom_violin() +
-    scale_fill_viridis(discrete = TRUE, alpha=0.6) +
-    geom_jitter(color="black", size=0.4, alpha=0.9) +
-    theme(
-      legend.position="none",
-      plot.title = element_text(size=11)
-    )
-```
-
-# Model Established
-```{r}
-mod.nolos.full <- glm(re.ad ~ . -los + cns:size + cns:gest + cns:bwt + cns:emp.f + cns:emp.m + cns:edu + cns:sex + size:gest + size:bwt + size:emp.f + size:emp.m + size:edu + size:sex + gest:bwt + gest:emp.f + gest:emp.m + gest:edu + gest:sex + bwt:emp.f + bwt:emp.m + bwt:edu + bwt:sex + emp.f:emp.m + emp.f:edu + emp.f:sex + emp.m:edu + emp.m:sex + edu:sex,
-           data= neomod,
-           family=binomial)
-
-summary.glm(mod.nolos.full)
-
-plot(mod.nolos.full)
-```
-As a result, we may consider the interactions effect on these variables, namely cns:emp.f, size:emp.f, size:emp.m, size:edu, gest:edu, bwt:edu, emp.m:edu.
-
-
-```{r}
-mod.los.full <- glm(re.ad ~ . + cns:size + cns:gest + cns:bwt + cns:emp.f + cns:emp.m + cns:edu + cns:sex + size:gest + size:bwt + size:emp.f + size:emp.m + size:edu + size:sex + gest:bwt + gest:emp.f + gest:emp.m + gest:edu + gest:sex + bwt:emp.f + bwt:emp.m + bwt:edu + bwt:sex + emp.f:emp.m + emp.f:edu + emp.f:sex + emp.m:edu + emp.m:sex + edu:sex,
-           data= neomod,
-           family=binomial)
-
-summary.glm(mod.los.full)
-
-plot(mod.los.full)
-```
-As a result, we may consider the los variable and interactions effect on these variables, namely cns:emp.f, size:emp.f, size:emp.m, size:edu, gest:edu, gest:sex, bwt:edu, emp.m:edu.
-
-```{r}
-anova(mod.los.full, mod.nolos.full, test = "Chisq")
-```
-As a result, these two model are different. We may make los variable be the covariant.
-
-```{r}
-mod <- glm(re.ad ~ . + cns:emp.f + size:emp.f + size:emp.m + size:edu + gest:edu + bwt:edu + emp.m:edu,
-           data= neomod,
-           family=binomial)
-summary(mod)
-plot(mod)
-```
-
-```{r}
 library(car)
-```
-
-This is an option plot.
-It can create a comprehensive diagnostic diagram. The horizontal axis represents the lever value, the vertical axis represents the student residual value, and the size of the symbol drawn is directly proportional to the Cook distance.
-  
-# Model Diagnostics
-```{r}
-influencePlot(mod)
-```
-
-This can test the overdispersion. If $\phi$ is greater than 1, it needs to be considered using Quasi-likelihood. See Chapter 5 in notes.
-
-# Check Overdispersion
-$$\phi = \frac{Residual\ \ Deviation}{Residual\ Degrees\ of\ Freedom}$$
-```{r}
-deviance(mod) / df.residual(mod)
-```
-As a result, the quasibinomial is needed to be consider.
-
-```{r}
-mod.quasi <- glm(re.ad ~ . + cns:emp.f + size:emp.f + size:emp.m + size:edu + gest:edu + bwt:edu + emp.m:edu,
-           data= neomod,
-           family=quasibinomial)
-summary(mod)
-plot(mod)
-```
-
-# Model selection
-
-Both the forward method and the backward method have obvious shortcomings. The forward method may have such a problem: it can not reflect the changes after the introduction of new independent variable values. Because the AIC corresponding to the regression equation is the minimum when an independent variable is introduced, but when other variables are introduced, the AIC value may be smaller if it is proposed from the regression equation, but there is no chance to put forward it by using the forward method, that is, once introduced, it will be lifelong. It is obviously not comprehensive to consider only the introduction but not the elimination. Similarly, once an independent variable is eliminated in the backward method, it has no chance to re-enter the regression equation.
-```{r}
+library(ggpubr)
 library(MASS)
 ```
 
 ```{r}
-mod.binomial <- glm(re.ad ~ . + cns:emp.f + size:emp.f + size:emp.m + size:edu + gest:edu + bwt:edu + emp.m:edu,
-           data= neomod,
-           family=binomial)
-stepAIC(mod.binomial, direction = "both", trace = 1)
+neomod <- read.table("../Data/neomod_isam12.dat", header = TRUE)
+
+neomod$cns    = factor(neomod$cns)
+neomod$size   = factor(neomod$size)
+neomod$gest   = factor(neomod$gest)
+neomod$emp.f  = factor(neomod$emp.f)
+neomod$emp.m  = factor(neomod$emp.m)
+neomod$edu    = factor(neomod$edu)
+neomod$re.ad  = factor(neomod$re.ad)
+neomod$sex    = factor(neomod$sex)
+neomod$accom  = factor(neomod$accom)
 ```
 
-Therefor, the final model is as follow:
 ```{r}
-model.final <- glm(formula = re.ad ~ cns + size + gest + emp.f + emp.m + edu + 
-    los + sex + accom + cns:emp.f + size:emp.f + size:edu + emp.m:edu, 
-    family = quasibinomial, data = neomod)
+p.bwt <- neomod %>%
+  ggplot(aes(x = re.ad, y = bwt, fill = re.ad)) +
+    geom_violin() +
+    scale_fill_viridis(discrete = TRUE, alpha = 0.6) +
+    geom_jitter(color = "black", size = 0.4, alpha = 0.9) +
+    theme(
+      legend.position = "none",
+      plot.title = element_text(size = 11)
+    )
+p.los <- neomod %>%
+  ggplot(aes(x = re.ad, y = los, fill = re.ad)) +
+    geom_violin() +
+    scale_fill_viridis(discrete = TRUE, alpha=0.6) +
+    geom_jitter(color="black", size=0.4, alpha=0.9) +
+    theme(
+      legend.position = "none",
+      plot.title = element_text(size = 11)
+    )
+ggarrange(p.bwt, p.los, ncol = 2, nrow = 1)
+```
 
-summary.glm(model.final)
-plot(model.final)
-```
-# Model Comparison
 ```{r}
-anova(mod.quasi, model.final, test = "Chisq")
+mod.nolos.full <- glm(re.ad ~ . -los + cns:size + cns:gest + cns:bwt + cns:emp.f + 
+                        cns:emp.m + cns:edu + cns:sex + size:gest + size:bwt + 
+                        size:emp.f + size:emp.m + size:edu + size:sex + gest:bwt + 
+                        gest:emp.f + gest:emp.m + gest:edu + gest:sex + bwt:emp.f + 
+                        bwt:emp.m + bwt:edu + bwt:sex + emp.f:emp.m + emp.f:edu + 
+                        emp.f:sex + emp.m:edu + emp.m:sex + edu:sex,
+                        data = neomod,
+                        family = binomial)
+
+summary.glm(mod.nolos.full)
 ```
-As a result, there was no significant difference between the two models. We choose the model with stepwise regression.
+
+```{r}
+mod.los.full <- glm(re.ad ~ . + cns:size + cns:gest + cns:bwt + cns:emp.f + cns:emp.m + 
+                      cns:edu + cns:sex + size:gest + size:bwt + size:emp.f + size:emp.m + 
+                      size:edu + size:sex + gest:bwt + gest:emp.f + gest:emp.m + gest:edu + 
+                      gest:sex + bwt:emp.f + bwt:emp.m + bwt:edu + bwt:sex + emp.f:emp.m + 
+                      emp.f:edu + emp.f:sex + emp.m:edu + emp.m:sex + edu:sex,
+                      data = neomod,
+                      family = binomial)
+
+summary.glm(mod.los.full)
+```
+
+```{r}
+anova(mod.los.full, mod.nolos.full, test = "Chisq")
+```
+
+```{r}
+mod.binomial <- glm(re.ad ~ . + cns:emp.f + size:emp.f + size:emp.m + gest:edu + bwt:edu + emp.m:edu,
+                data = neomod,
+                family = binomial)
+
+deviance(mod.binomial) / df.residual(mod.binomial)
+```
+
+```{r}
+mod.quasibinomial <- glm(re.ad ~ . + cns:emp.f + size:emp.f + size:emp.m + gest:edu + bwt:edu + emp.m:edu,
+                data = neomod,
+                family = quasibinomial)
+
+pchisq(summary(mod.binomial)$dispersion * mod.quasibinomial$df.residual, mod.quasibinomial$df.residual, lower = FALSE)
+```
+
+```{r}
+mod.step <- stepAIC(mod.binomial, direction = "both", trace = FALSE)
+mod.step
+```
+
+```{r}
+anova(mod.step, mod.binomial, test = "Chisq")
+```
+
+```{r}
+summary.glm(mod.step)
+```
+
+```{r, fig.align="center"}
+par(mfrow = c(2,2), mar = c(2.5,2,2,1))
+plot(mod.step)
+```

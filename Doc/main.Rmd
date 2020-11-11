@@ -1,40 +1,320 @@
 ---
-title: "Choose an informative title for your coursework project"
-author: "student-id-numbers"
-date: "2020-10-20"
-output: pdf_document
+title: "The Influence of Multiple Variables on High-Risk Neonatal Survivors Based on the Quasi-Binomial Distribution  GLM Model"
+author: 
+  - "Group 12"
+  - "Congye Wang 35427962"
+  - "Kieran Molloy 35762970"
+date: "Nov 11, 2020"
+output: 
+  pdf_document:
+    fig_width: 5
+    fig_height: 3
+    fig_caption: true
 bibliography: bibliography.bib
 ---
 
-# Introduction
+# 1 Introduction
+The purpose of this report is to quantify the impact of CNS services on mother and child satisfaction. According to the dataset of [@langley2002impact], the baby is visited by family at least 5 times a week in the first month after discharge from the neonatal department. CNS may provide temporary advice to family within 12 months of age. At the same time, it also provides designated nurses between primary and secondary health services.
 
-Here is an example reference [@Abrams2005].
+Besides, 1488 complete data were collected by means of a questionnaire containing CNS information which was from 8 NNUs during 3 years. The data collected 10 covariates as well, and the dependent variable was whether the patient was hospitalized again within one year.
 
-# Methods
+# 2 Methods
+Firstly, the data was transformation and preliminary analysis. we begins by factorizing the qualitative variables in the data, and operate the exploratory analysis and visualization of the continuous variables. Violin plots are shown to depict the distribution of bwt and los variables.
 
-My text
+Secondly, the preliminary model are created. We first model using a generalized linear model based on a binomial distribution, which consider all of the variables interactions and transformations. Thus, the los variable was added in the initial model to calculate the effect, and use ANOVA with $\chi^{2}$ testing to to determine if the model is the same model. The form of the two models are as follow
 
-My model
-$$ y_i = \beta_0 + \beta_1x_i + \varepsilon_i,\  \varepsilon_i \sim N(0, \sigma^2) $$
+$$f(x,\pi) = \left(\begin{array}{ccc}n \\x \\ \end{array}\right) \pi^{x}(1-\pi)^{(n-x)}, x = 0,1,2,..,n$$
 
-# Results
+and the quantitative variables are factored to some dummies matrix. Such as 
 
-```{r, include = FALSE}
-mydata <- read.csv("mydata.csv")
-model <- lm(y ~ x, data = mydata)
-summary(model)
+$$X_{gest} = [x_{1}, x_{2}, x_{3}, x_{4}, x_{5}]$$
+
+$$\Rightarrow X_{gest} = X_{1488\times 5} =\left[\begin{array}{ccccc}1 & 0 & 0 & 0 & 0 \\0 & 1 & 0 & 0 & 0 \\ \vdots & \vdots & \vdots & \vdots & \vdots \\0 & 0 & 0 & 0 & 1\end{array}\right]$$
+
+After data preparation is complete, we first run a regression on all the independent variables except los and consider the interaction effects of all variables as follow:
+```{r eval=FALSE}
+mod.nolos.full <- glm(re.ad ~ . - los + cns:size + cns:gest + cns:bwt + cns:emp.f 
+                      + cns:emp.m + cns:edu + cns:sex + size:gest + size:bwt 
+                      + size:emp.f + size:emp.m + size:edu + size:sex + gest:bwt 
+                      + gest:emp.f + gest:emp.m + gest:edu + gest:sex + bwt:emp.f 
+                      + bwt:emp.m + bwt:edu + bwt:sex + emp.f:emp.m + emp.f:edu 
+                      + emp.f:sex + emp.m:edu + emp.m:sex + edu:sex,
+                  data= neomod,
+                  family=binomial)
 ```
 
-# Conclusion
+We then added los variables to the independent variables and compared them using the ANOVA model. After determining that adding los variables had a significant effect on the model, we determined that the preliminary model with los and consider the interactions effect on these variables, namely cns:emp.f, size:emp.f, size:emp.m, size:edu, gest:edu, bwt:edu, emp.m:edu. The model diagnosis diagram is given in the result.
+
+Thirdly, the model need to be checked for overdispersion. The expected variance of the data sampled from the binomial distribution is $\sigma^{2}=n\pi(1-\pi)$, where n is the number of observations and $\pi$ is the probability of belonging to the $Y=1$ group. An overdiscrepancy is defined as the observed variance of the response variable being greater than the expected variance of the binomial distribution. Overdissociation can lead to odd standard error tests and imprecise significance tests. When overdissociation occur, the GLM function can still be used to fit the logistic regression, but then the binomial distribution need to be change for the Quasibi-Nomial distribution.
+
+This can test the overdispersion. If $\phi$ is greater than 1, it needs to be considered using Quasi-likelihood. One way to detect an overdiscrepancy is to compare the residual deviation of the binomial distribution model with the residual degrees of freedom, if the ratio
+
+$$\phi = \frac{Residual\ \ Deviation}{Residual\ Degrees\ of\ Freedom}$$
+If it is much larger than 1, we can consider that there is an overdispersion. Fit the model twice, as well as use binomial family for the first time and use quasi binomial family for the second time. Suppose that the first glm() return object is marked as fit and the second return object is marked as fit fit.od. 
+
+Then:
+```{r eval=FALSE}
+pchisq(summary(fit.od)$dispersion * fit$df.residual, fit$df.residual, lower = F)
+```
+
+The null hypothesis $H0: \phi = 1$ and alternative hypothesis $H1: \phi \ne 1$ can be tested by the provided p value. If P is very small (less than 0.05), we can reject the null hypothesis.
+
+Finally, the model was be selected. Both the forward method and the backward method have obvious shortcomings. The forward method may have such a problem: it can not reflect the changes after the introduction of new independent variable values, since the AIC corresponding to the regression equation is the minimum when an independent variable is introduced. However, when other variables are introduced, the AIC value may be smaller if it is proposed from the regression equation, but there is no chance to put forward it by using the forward method, that is, once introduced, it will be lifelong. It is obviously not comprehensive to consider only the introduction but not the elimination. Similarly, once an independent variable is eliminated in the backward method, it has no chance to re-enter the regression equation. Stepwise stepwise regression combines forward stepwise regression and backward stepwise regression. Variables enter one at a time, but in each step, variables will be re evaluated, variables that do not contribute to the model will be deleted, and prediction variables may be added or deleted several times until the optimal model is obtained. We use ANOVA to compare the full model and the step model. If the results show no significant difference, we tend to use the stepwise regression model.
+
+# 3 Results
+
+```{r echo=FALSE, message=FALSE}
+library(tidyverse)
+library(viridis)
+library(car)
+library(ggpubr)
+```
+
+```{r echo=FALSE}
+neomod <- read.table("../Data/neomod_isam12.dat", header = T)
+
+neomod$cns    = factor(neomod$cns)
+neomod$size   = factor(neomod$size)
+neomod$gest   = factor(neomod$gest)
+neomod$emp.f  = factor(neomod$emp.f)
+neomod$emp.m  = factor(neomod$emp.m)
+neomod$edu    = factor(neomod$edu)
+neomod$re.ad  = factor(neomod$re.ad)
+neomod$sex    = factor(neomod$sex)
+neomod$accom  = factor(neomod$accom)
+```
+
+## 3.1 Exploratory Analysis
+```{r echo=FALSE, fig.align="center"}
+p.bwt <- neomod %>%
+  ggplot(aes(x=re.ad, y=bwt, fill=re.ad)) +
+    geom_violin() +
+    scale_fill_viridis(discrete = TRUE, alpha=0.6) +
+    geom_jitter(color="black", size=0.4, alpha=0.9) +
+    theme(
+      legend.position="none",
+      plot.title = element_text(size=11)
+    )
+p.los <- neomod %>%
+  ggplot(aes(x=re.ad, y=los, fill=re.ad)) +
+    geom_violin() +
+    scale_fill_viridis(discrete = TRUE, alpha=0.6) +
+    geom_jitter(color="black", size=0.4, alpha=0.9) +
+    theme(
+      legend.position="none",
+      plot.title = element_text(size=11)
+    )
+ggarrange(p.bwt, p.los, ncol = 2, nrow = 1)
+```
+
+The violin graphs demonstrate that bwt's data are more concentrated when re.ad is used as a grouping, while los is more scattered and has outliers.
+
+## 3.2 Model Established
+```{r, results=FALSE}
+mod.nolos.full <- glm(re.ad ~ . -los + cns:size + cns:gest + cns:bwt + cns:emp.f + 
+                        cns:emp.m + cns:edu + cns:sex + size:gest + size:bwt + 
+                        size:emp.f + size:emp.m + size:edu + size:sex + gest:bwt + 
+                        gest:emp.f + gest:emp.m + gest:edu + gest:sex + bwt:emp.f + 
+                        bwt:emp.m + bwt:edu + bwt:sex + emp.f:emp.m + emp.f:edu + 
+                        emp.f:sex + emp.m:edu + emp.m:sex + edu:sex,
+                        data= neomod,
+                        family=binomial)
+
+summary.glm(mod.nolos.full)
+```
+
+Due to the lengthy results, it will be placed in the appendix. Based on the results shown, we were able to identify the significant interaction effects between cns and emp.f, size and emp.f, size and emp.m, size and edu, gest and edu, bwt and edu, as well as emp.m and edu.
+
+```{r, results=FALSE}
+mod.los.full <- glm(re.ad ~ . + cns:size + cns:gest + cns:bwt + cns:emp.f + cns:emp.m + 
+                      cns:edu + cns:sex + size:gest + size:bwt + size:emp.f + size:emp.m + 
+                      size:edu + size:sex + gest:bwt + gest:emp.f + gest:emp.m + gest:edu + 
+                      gest:sex + bwt:emp.f + bwt:emp.m + bwt:edu + bwt:sex + emp.f:emp.m + 
+                      emp.f:edu + emp.f:sex + emp.m:edu + emp.m:sex + edu:sex,
+                      data= neomod,
+                      family=binomial)
+
+summary.glm(mod.los.full)
+```
+
+This time the model added los variables and the results showed a significant p-value for los, so we need to consider regression using los as an independent variable. In addition, we may consider the interactions effect on these variables, namely cns:emp.f, size:emp.f, size:emp.m, gest:edu, bwt:edu, and  emp.m:edu.
+
+```{r}
+anova(mod.los.full, mod.nolos.full, test = "Chisq")
+```
+
+This result shows that we cannot ignore the los variable simplely since these two models are different. Therefor, we may choose the second model.
+
+## 3.3 Overdispersion Test
+
+Firstly, we calculated the $\phi$ in this step.
+```{r}
+mod.binomial <- glm(re.ad ~ . + cns:emp.f + size:emp.f + size:emp.m + gest:edu + bwt:edu + emp.m:edu,
+                data= neomod,
+                family=binomial)
+
+deviance(mod.binomial) / df.residual(mod.binomial)
+```
+
+The results show that although X is greater than 1, but it is still a small value. Hence, in order to quantitatively determine the analysis, we chose to calculate the p-value.
+
+```{r}
+mod.quasibinomial <- glm(re.ad ~ . + cns:emp.f + size:emp.f + size:emp.m + gest:edu + bwt:edu + emp.m:edu,
+                data= neomod,
+                family=quasibinomial)
+
+pchisq(summary(mod.binomial)$dispersion * mod.quasibinomial$df.residual, mod.quasibinomial$df.residual, lower = F)
+```
+
+This p-value is `r pchisq(summary(mod.binomial)$dispersion * mod.quasibinomial$df.residual, mod.quasibinomial$df.residual, lower = F)` which is much bigger than 0.05. As a result, we can make sure we do not need to use Quasi-Binomial family model.
+
+## 3.4 Model Selection
+
+We used stepwise regression with the goal of reducing the AIC value to select the model.
+```{r, message=FALSE, results=FALSE}
+library(MASS)
+mod.step <- stepAIC(mod.binomial, direction = "both", trace = FALSE)
+mod.step
+```
+
+After obtaining the stepwise regression equation, we performed an ANOVA test on the original model and it as follow.
+
+```{r}
+anova(mod.step, mod.binomial, test = "Chisq")
+```
+
+The results show that the p-value is 0.114, which is greater than 0.05. Therefore, we can judge that the two models are not significantly different at a confidence interval of 95%.The stepwise regression results is chosen as the final model.
+
+## 3.5 Model Diagnostics
+
+```{r}
+summary.glm(mod.step)
+```
+
+From the summary results, emp.f1 and edu have p-values greater than 0.05, which is not significant. Apart from those, the coefficients of the variables all pass the significance test. Meanwhile, the interaction of emp.m1 and edu2 has the greatest impact on the positive correlation of the model, and emp.m1 has the greatest impact on the negative correlation of the model.
+
+```{r, fig.align="center"}
+par(mfrow=c(2,2), mar=c(2.5,2,2,1))
+plot(mod.step)
+```
+
+As can be seen from the residual versus fitted graph plots, there is no systematic correlation between the residual and the fitted values, which means that we do not need to perform a responsible transformation of the independent variables. The normal Q-Q plot shows the probability plot of the standardized residuals for the values corresponding to the normal distribution, which can be seen that the model largely satisfies the assumption of normality. If the assumption of constant variance is met, then in the Scale-Location Graph, the points around the horizontal line should be randomly distributed. The graph does not seem to meet this assumption. The last "Residuals vs Leverage" graph provides information on individual observations that may be of interest. Outliers, high leverage value points , and strong influence points can be identified from the graph. The pictures show that the Cook distances for most of the data are concentrated around 0.00 to 0.01.
+
+# 4 Conclusion
+In Chapter 3 we discussed in detail the results of the model, which showed that a mother's employment versus leaving full-time education largely drove her child's admission to hospital within 12 months, whereas a mother's care at home would have prevented the child from going to hospital. As well as, the larger of the size of NUU, the higher probability of entering the hospital. By contraries, living alone and receiving help from CNS can save a child from going to the hospital.
+
+The model is good overall, but there are two shortcomings. First, the model has large AIC values, which means that the fit is not very good. Second, there are insignificant coefficients in the model, which reduces the model's goodness-of-fit and the adjusted $R^{2}$.
 
 # References 
 
-<div id="refs">
-</div>
+<div id="refs"></div>
+
+\pagebreak
 
 # Appendix of R code
+```{r}
+library(tidyverse)
+library(viridis)
+library(car)
+library(ggpubr)
+library(MASS)
+```
 
-```{r, eval=FALSE}
-mydata <- read.csv("mydata.csv")
-model <- lm(y ~ x, data = mydata)
+```{r}
+neomod <- read.table("../Data/neomod_isam12.dat", header = TRUE)
+
+neomod$cns    = factor(neomod$cns)
+neomod$size   = factor(neomod$size)
+neomod$gest   = factor(neomod$gest)
+neomod$emp.f  = factor(neomod$emp.f)
+neomod$emp.m  = factor(neomod$emp.m)
+neomod$edu    = factor(neomod$edu)
+neomod$re.ad  = factor(neomod$re.ad)
+neomod$sex    = factor(neomod$sex)
+neomod$accom  = factor(neomod$accom)
+```
+
+```{r}
+p.bwt <- neomod %>%
+  ggplot(aes(x = re.ad, y = bwt, fill = re.ad)) +
+    geom_violin() +
+    scale_fill_viridis(discrete = TRUE, alpha = 0.6) +
+    geom_jitter(color = "black", size = 0.4, alpha = 0.9) +
+    theme(
+      legend.position = "none",
+      plot.title = element_text(size = 11)
+    )
+p.los <- neomod %>%
+  ggplot(aes(x = re.ad, y = los, fill = re.ad)) +
+    geom_violin() +
+    scale_fill_viridis(discrete = TRUE, alpha=0.6) +
+    geom_jitter(color="black", size=0.4, alpha=0.9) +
+    theme(
+      legend.position = "none",
+      plot.title = element_text(size = 11)
+    )
+ggarrange(p.bwt, p.los, ncol = 2, nrow = 1)
+```
+
+```{r}
+mod.nolos.full <- glm(re.ad ~ . -los + cns:size + cns:gest + cns:bwt + cns:emp.f + 
+                        cns:emp.m + cns:edu + cns:sex + size:gest + size:bwt + 
+                        size:emp.f + size:emp.m + size:edu + size:sex + gest:bwt + 
+                        gest:emp.f + gest:emp.m + gest:edu + gest:sex + bwt:emp.f + 
+                        bwt:emp.m + bwt:edu + bwt:sex + emp.f:emp.m + emp.f:edu + 
+                        emp.f:sex + emp.m:edu + emp.m:sex + edu:sex,
+                        data = neomod,
+                        family = binomial)
+
+summary.glm(mod.nolos.full)
+```
+
+```{r}
+mod.los.full <- glm(re.ad ~ . + cns:size + cns:gest + cns:bwt + cns:emp.f + cns:emp.m + 
+                      cns:edu + cns:sex + size:gest + size:bwt + size:emp.f + size:emp.m + 
+                      size:edu + size:sex + gest:bwt + gest:emp.f + gest:emp.m + gest:edu + 
+                      gest:sex + bwt:emp.f + bwt:emp.m + bwt:edu + bwt:sex + emp.f:emp.m + 
+                      emp.f:edu + emp.f:sex + emp.m:edu + emp.m:sex + edu:sex,
+                      data = neomod,
+                      family = binomial)
+
+summary.glm(mod.los.full)
+```
+
+```{r}
+anova(mod.los.full, mod.nolos.full, test = "Chisq")
+```
+
+```{r}
+mod.binomial <- glm(re.ad ~ . + cns:emp.f + size:emp.f + size:emp.m + gest:edu + bwt:edu + emp.m:edu,
+                data = neomod,
+                family = binomial)
+
+deviance(mod.binomial) / df.residual(mod.binomial)
+```
+
+```{r}
+mod.quasibinomial <- glm(re.ad ~ . + cns:emp.f + size:emp.f + size:emp.m + gest:edu + bwt:edu + emp.m:edu,
+                data = neomod,
+                family = quasibinomial)
+
+pchisq(summary(mod.binomial)$dispersion * mod.quasibinomial$df.residual, mod.quasibinomial$df.residual, lower = FALSE)
+```
+
+```{r}
+mod.step <- stepAIC(mod.binomial, direction = "both", trace = FALSE)
+mod.step
+```
+
+```{r}
+anova(mod.step, mod.binomial, test = "Chisq")
+```
+
+```{r}
+summary.glm(mod.step)
+```
+
+```{r, fig.align="center"}
+par(mfrow = c(2,2), mar = c(2.5,2,2,1))
+plot(mod.step)
 ```
