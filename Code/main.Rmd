@@ -46,9 +46,9 @@ mod.nolos.full <- glm(re.ad ~ . -los + cns:size + cns:gest + cns:bwt + cns:emp.f
            data= neomod,
            family=binomial)
 
-summary(mod.nolog.full)
+summary.glm(mod.nolos.full)
 
-plot(mod.nolog.full)
+plot(mod.nolos.full)
 ```
 As a result, we may consider the interactions effect on these variables, namely cns:emp.f, size:emp.f, size:emp.m, size:edu, gest:edu, bwt:edu, emp.m:edu.
 
@@ -58,14 +58,14 @@ mod.los.full <- glm(re.ad ~ . + cns:size + cns:gest + cns:bwt + cns:emp.f + cns:
            data= neomod,
            family=binomial)
 
-summary.glm(mod.log.full)
+summary.glm(mod.los.full)
 
-plot(mod.log.full)
+plot(mod.los.full)
 ```
 As a result, we may consider the los variable and interactions effect on these variables, namely cns:emp.f, size:emp.f, size:emp.m, size:edu, gest:edu, gest:sex, bwt:edu, emp.m:edu.
 
 ```{r}
-anova(mod.log.full, mod.nolog.full, test = "Chisq")
+anova(mod.los.full, mod.nolos.full, test = "Chisq")
 ```
 As a result, these two model are different. We may make los variable be the covariant.
 
@@ -129,3 +129,8 @@ model.final <- glm(formula = re.ad ~ cns + size + gest + emp.f + emp.m + edu +
 summary.glm(model.final)
 plot(model.final)
 ```
+# Model Comparison
+```{r}
+anova(mod.quasi, model.final, test = "Chisq")
+```
+As a result, there was no significant difference between the two models. We choose the model with stepwise regression.
