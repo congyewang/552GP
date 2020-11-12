@@ -149,9 +149,10 @@ This result shows that we cannot ignore the los variable simply since these two 
 
 Firstly, we calculated the $\phi$ in this step.
 ```{r}
-mod.binomial <- glm(re.ad ~ . + cns:emp.f + size:emp.f + size:emp.m + gest:edu + bwt:edu + emp.m:edu,
-                data= neomod,
-                family=binomial)
+mod.binomial <- glm(re.ad ~ . + cns:emp.f + size:emp.f + size:emp.m + gest:edu + bwt:edu
+                    + emp.m:edu,
+                data = neomod,
+                family = binomial)
 
 deviance(mod.binomial) / df.residual(mod.binomial)
 ```
@@ -159,11 +160,13 @@ deviance(mod.binomial) / df.residual(mod.binomial)
 The results show that although X is greater than 1, but it is still a small value. Hence, in order to quantitatively determine the analysis, we chose to calculate the p-value.
 
 ```{r}
-mod.quasibinomial <- glm(re.ad ~ . + cns:emp.f + size:emp.f + size:emp.m + gest:edu + bwt:edu + emp.m:edu,
-                data= neomod,
-                family=quasibinomial)
+mod.quasibinomial <- glm(re.ad ~ . + cns:emp.f + size:emp.f + size:emp.m + gest:edu 
+                         + bwt:edu + emp.m:edu,
+                data = neomod,
+                family = quasibinomial)
 
-pchisq(summary(mod.binomial)$dispersion * mod.quasibinomial$df.residual, mod.quasibinomial$df.residual, lower = F)
+pchisq(summary(mod.binomial)$dispersion * mod.quasibinomial$df.residual, 
+       mod.quasibinomial$df.residual, lower = F)
 ```
 
 This p-value is `r pchisq(summary(mod.binomial)$dispersion * mod.quasibinomial$df.residual, mod.quasibinomial$df.residual, lower = F)` which is much bigger than 0.05. As a result, we can make sure we do not need to use Quasi-Binomial family model.
@@ -286,7 +289,8 @@ anova(mod.los.full, mod.nolos.full, test = "Chisq")
 ```
 
 ```{r}
-mod.binomial <- glm(re.ad ~ . + cns:emp.f + size:emp.f + size:emp.m + gest:edu + bwt:edu + emp.m:edu,
+mod.binomial <- glm(re.ad ~ . + cns:emp.f + size:emp.f + size:emp.m + gest:edu + bwt:edu
+                    + emp.m:edu,
                 data = neomod,
                 family = binomial)
 
@@ -294,11 +298,13 @@ deviance(mod.binomial) / df.residual(mod.binomial)
 ```
 
 ```{r}
-mod.quasibinomial <- glm(re.ad ~ . + cns:emp.f + size:emp.f + size:emp.m + gest:edu + bwt:edu + emp.m:edu,
+mod.quasibinomial <- glm(re.ad ~ . + cns:emp.f + size:emp.f + size:emp.m + gest:edu
+                         + bwt:edu + emp.m:edu,
                 data = neomod,
                 family = quasibinomial)
 
-pchisq(summary(mod.binomial)$dispersion * mod.quasibinomial$df.residual, mod.quasibinomial$df.residual, lower = FALSE)
+pchisq(summary(mod.binomial)$dispersion * mod.quasibinomial$df.residual, 
+       mod.quasibinomial$df.residual, lower = F)
 ```
 
 ```{r}
