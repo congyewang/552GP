@@ -20,6 +20,8 @@ neomod$sex    = factor(neomod$sex)
 neomod$accom  = factor(neomod$accom)
 ```
 
+
+
 ```{r}
 p.bwt <- neomod %>%
   ggplot(aes(x = re.ad, y = bwt, fill = re.ad)) +
@@ -68,7 +70,9 @@ summary.glm(mod.los.full)
 ```
 
 ```{r}
-anova(mod.los.full, mod.nolos.full, test = "Chisq")
+f = anova(mod.los.full, mod.nolos.full, test = "Chisq")
+
+f
 ```
 
 ```{r}

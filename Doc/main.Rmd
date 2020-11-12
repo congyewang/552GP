@@ -41,6 +41,10 @@ mod.nolos.full <- glm(re.ad ~ . - los + cns:size + cns:gest + cns:bwt + cns:emp.
                       + emp.f:sex + emp.m:edu + emp.m:sex + edu:sex,
                   data= neomod,
                   family=binomial)
+#summary(mod.nolos.full)
+
+
+plot(mod.nolos.full)
 ```
 
 We then added los variables to the independent variables and compared them using the ANOVA model. After determining that adding los variables had a significant effect on the model, we determined that the preliminary model with los and consider the interactions effect on these variables, namely cns:emp.f, size:emp.f, size:emp.m, size:edu, gest:edu, bwt:edu, emp.m:edu. The model diagnosis diagram is given in the result.
