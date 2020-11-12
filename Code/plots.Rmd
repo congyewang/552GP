@@ -1,0 +1,86 @@
+---
+title: "MATH552 Project Plots"
+output: html_notebook
+---
+
+
+
+```{r}
+library(ggfortify)
+```
+
+
+## Data Count by Gestation Period
+
+```{r}
+ggplot(neomod, aes(x=gest)) +
+  geom_bar() +
+  xlab("Gestation Period") +
+  ylab("Number of Cases") +
+  ggtitle("NNU Case Count for Varying Gestation Periods") +
+  theme_bw() +
+  ggsave("gest.png")
+```
+
+## Birthweight / Length of Stay + Gender -> Re-admission
+
+```{r}
+p.bwt <- neomod %>%
+  ggplot(aes(x = re.ad, y = bwt, fill = re.ad, color=sex)) +
+  geom_violin() +
+  scale_x_discrete(name= "Re-admission to NNU", labels=c("Not Re-admitted", "Re-admitted")) +
+  scale_fill_viridis(discrete = TRUE, alpha = 0.6) +
+  geom_jitter(color = "black", size = 0.4, alpha = 0.9) +
+  theme_bw()  +
+  ylab("Birthweight (g)") +
+  ggtitle("Comparing Birthweight and Gender to Re-admission") +
+  ggsave("bwt.gender.png")
+
+p.los <- neomod %>%
+  ggplot(aes(x = re.ad, y = los, fill = re.ad, color=sex)) +
+  geom_violin() +
+  scale_x_discrete(name= "Re-admission to NNU", labels=c("Not Re-admitted", "Re-admitted")) +
+  scale_fill_viridis(discrete = TRUE, alpha=0.6) +
+  geom_jitter(color="black", size=0.4, alpha=0.9) +
+  theme_bw()+
+  ylab("Total Length of Stay in NNU in days (log(n))") +
+  ggtitle("Comparing Length of Stay and Gender to Re-admission") +
+  ggsave("los.gender.png")
+
+
+```
+
+## Birthweight + Gestation -> Re-admission
+
+```{r}
+p.gest = neomod %>%
+  ggplot(aes(x = gest, y = bwt, fill = re.ad)) +
+  geom_violin() +
+  scale_x_discrete(name= "Gestation Period (weeks)", labels=c("<26", "26-29", "30-32", "33-36",">36")) +
+  scale_fill_viridis(discrete = TRUE, alpha=0.6) +
+  geom_jitter(color="black", size=0.4, alpha=0.9) +
+  theme_bw()+
+  ylab("Birthweight (g) ") +
+  ggtitle("Comparing Birthweight and Gestation Period to Re-admission") +
+  ggsave("bwt.gest.png")
+```
+
+
+```{r}
+autoplot(mod.nolos.full, which = 1:4, label.size = 3)+ 
+  theme_bw() + 
+  ggsave("glm.mod1.png")
+```
+
+```{r}
+autoplot(mod.los.full, which = 1:4, label.size = 3)+ 
+  theme_bw()
+```
+
+```{r}
+autoplot(mod.step, which = 1:4, label.size = 3)+ 
+  theme_bw()
+```
+
+
+
