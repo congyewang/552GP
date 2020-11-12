@@ -1,0 +1,111 @@
+---
+title: "MATH552 Project Plots"
+output: html_notebook
+---
+
+```{r}
+if(!require(pacman))install.packages("pacman")
+
+pacman::p_load('dplyr', 'tidyr', 'gapminder',
+               'ggplot2',  'ggalt',
+               'forcats', 'R.utils', 'png', 
+               'grid', 'ggpubr', 'scales',
+               'bbplot')
+```
+
+
+```{r}
+library(tidyverse)
+library(viridis)
+library(car)
+library(ggpubr)
+library(MASS)
+```
+
+```{r}
+neomod <- read.table("../Data/neomod_isam12.dat", header = TRUE)
+
+neomod$cns    = factor(neomod$cns)
+neomod$size   = factor(neomod$size)
+neomod$gest   = factor(neomod$gest)
+neomod$emp.f  = factor(neomod$emp.f)
+neomod$emp.m  = factor(neomod$emp.m)
+neomod$edu    = factor(neomod$edu)
+neomod$re.ad  = factor(neomod$re.ad)
+neomod$sex    = factor(neomod$sex)
+neomod$accom  = factor(neomod$accom)
+```
+
+
+```{r}
+702 + 786
+```
+
+
+## Data Count by Gestation Period
+
+```{r}
+ggplot(neomod, aes(x=gest)) +
+ geom_bar() +
+ xlab("Gestation Period") +
+ ylab("Number of Cases") +
+ ggtitle("NNU Case Count for Varying Gestation Periods") +
+  ggsave("gest.png")
+```
+
+## Birthweight / Length of Stay + Gender -> Re-admission
+
+```{r}
+p.bwt <- neomod %>%
+  ggplot(aes(x = re.ad, y = bwt, fill = re.ad, color=sex)) +
+  geom_violin() +
+  scale_x_discrete(name= "Re-admission to NNU", labels=c("Not Re-admitted", "Re-admitted")) +
+  scale_fill_viridis(discrete = TRUE, alpha = 0.6) +
+  geom_jitter(color = "black", size = 0.4, alpha = 0.9) +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(size = 11)
+  )  +
+ ylab("Birthweight (g)")
+
+p.los <- neomod %>%
+  ggplot(aes(x = re.ad, y = los, fill = re.ad, color=sex)) +
+  geom_violin() +
+  scale_x_discrete(name= "Re-admission to NNU", labels=c("Not Re-admitted", "Re-admitted")) +
+  scale_fill_viridis(discrete = TRUE, alpha=0.6) +
+  geom_jitter(color="black", size=0.4, alpha=0.9) +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(size = 11)
+  )  +
+ ylab("Total Length of Stay in NNU in days (log(n))")
+
+ggarrange(p.bwt, p.los, ncol = 2, nrow = 1) %>%
+  annotate_figure(gg,
+                 top = text_grob("Comparing Birthweight and Gender, Length of Stay and Gender to Re-admission", face = "bold", size = 12)) %>%
+  ggexport(filename = "bwt.los.png")
+
+```
+
+## Birthweight + Gestation -> Re-admission
+
+```{r}
+p.gest = neomod %>%
+  ggplot(aes(x = gest, y = bwt, fill = re.ad)) +
+  geom_violin() +
+  scale_x_discrete(name= "Gestation Period (weeks)", labels=c("<26", "26-29", "30-32", "33-36",">36")) +
+  scale_fill_viridis(discrete = TRUE, alpha=0.6) +
+  geom_jitter(color="black", size=0.4, alpha=0.9) +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(size = 11)
+  )  +
+ ylab("Birthweight (g) ")
+
+gg = ggarrange(p.gest, ncol = 1, nrow = 1)
+annotate_figure(gg,
+               top = text_grob("Comparing Birthweight and Gestation Period to Re-admission", face = "bold", size = 12)) %>%
+  ggexport(filename = "bwt.gest.png")
+
+```
+

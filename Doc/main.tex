@@ -2,28 +2,175 @@
 \usepackage{labreport}
 
 
-\title{MATH552 Group Project}
-\author{Congye Wang \& Kieran Molloy}
+
+\title{The Influence of Multiple Variables on High-Risk Neonatal Survivors Based on the Quasi-Binomial Distribution  GLM Model}
+% Authors
+\author{
+  Wang, Congye\\
+  \texttt{c.wang35@lancaster.ac.uk}
+  \and
+  Molloy, Kieran\\
+  \texttt{k.molloy@lancaster.ac.uk}
+}
 \date{\today}
 
 \begin{document}
 
+%% INSERTING PLAIN FIRST PAGE
+\thispagestyle{plain}
+\begin{center}
+    \Large
+    \textbf{MATH552 Group Project}
+        
+    \vspace{0.4cm}
+    \large
+    Group 12
+        
+    \vspace{0.4cm}
+    35427962 \& 35762970
+       
+    \vspace{0.9cm}
+    \textbf{\today}
+    
+    \vspace{0.9cm}
+    Congye Wang (35427962) and Kieran Molloy (35762970) have contributed equally to the whole project and agree to share the mark equally
+    \end{center}
+
+%% START OF DOCUMENT
+
 \maketitle
 
-\begin{abstract}
+\begin{abstract}\label{sec:abstract}
 Insert Abstract Here
 \end{abstract}
 
+%% SECTION INTRODUCTION
 \section{Introduction}\label{sec:intro}
-Insert Introduction
+High rates of infant morbidity arising from low birth weight impose a significant burden on families, in addition to health, education ans social services, as shown in \cite{boyle1983}'s landmark journal which found that for infants of $<1500g$ admitted to neonatal intensive care units, the long‐term costs outweighed the measurable economic benefits. As reported in \cite{mugford2001} and described further in \cite{petrou2001}, low birth weight is increasing in industrialised nations. In the UK, it increased from 0.8\% to 1.2\% from 1983 to 1998, similar trends are noticed in other industrialised nations. Additionally, advances in medicine and medical practices such as increased use of assisted ventilation during delivery and various disinfectant methods have led to increasing premature births surviving and with that, low birth weights increasing. Trends such as these are only likely to increase, with medical advances, leading to an increased requirement of specialist services for high risk - low birth weight infants requiring further support.
 
-\section{Method}\label{sec:method}
-Insert Method
+The purpose of this report is to quantify the impact of Community Neonatal Services (CNS) on mother and child satisfaction compared to centres without CNS. In \cite{langley2002impact} service was measured by a number of responses such as:
+\begin{itemize}
+    \item Length of stay in hospital from birth to initial discharge
+    \item Number of hospital readmissions required by these infants
+    \item Support and equality of care provided to the family in the first year of life after discharge
+    \item Overall costs of treatment in the first year of life
+\end{itemize}
+Their report focused on objectives 1 and 2, as objective 3 is a well studied problem, and objective 4 is difficult to measure with insufficient data.
 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\textwidth]{images/gest.png}
+    \label{img:gest}
+    \caption{Gestation}
+\end{figure}
+
+Investigating the impact of  on high risk neonatal survivors within the first year of life, based on data-sets derived from \cite{langley2002impact}. In \cite{langley2002impact}, a total of 166 units (76\%) responded, and 120 (55\%) were willing to participate in research, and it stated that there were no consistent guidelines / definitions for what a CNS was. Henceforth, some guidelines were created to categorise units:
+\begin{enumerate}\label{enum:CNS-types}
+    \item Home visits offering nursing care and specialist advice for a minimum of five days a week for the first month after discharge from the Neonatal Unit (NNU)
+    \item Ad-hoc advice to families until the infant was at least 12 months old
+    \item A named nurse providing the link between primary and secondary health care services.
+\end{enumerate}
+
+From the initial data set, an random set of 1488 samples was extracted, considering a response variable (readmission) for 10 covariates (see table \ref{tab:nnu-cns-analysis} for 9 of the covariates, with total length of stay in hospital during initial admission not in this table). This data was collected from an 18 NNU subsample of \cite{langley2002impact}, with surveys sent to every mother who has visited within the previous 3 years. There was a total of 1488 responses, shown in Table \ref{tab:nnu-cns-analysis}
+
+\begin{table}[ht!]
+    \centering
+    \begin{tabular}{|r|l|l|l|l|}
+        \hline
+                              & NNU w/ CNS & NNU w/o CNS & Total &  \\
+        \hline
+        n                     & 702        & 786         & 1488  &  \\
+        Birth weight (g)      & 1649.42    & 1743.20     &       &  \\
+        \hline
+        Gestation             &            &             &       &  \\
+        - \textgreater{}26    & 19         & 25          &       &  \\
+        - 26-29               & 191        & 193         &       &  \\
+        - 30-32               & 261        & 239         &       &  \\
+        - 33-36               & 209        & 146         &       &  \\
+        - \textgreater{}36    & 106        & 99          &       &  \\
+        \hline
+        Gender                &            &             &       &  \\
+        - Female              & 353        & 355         &       &  \\
+        - Male                & 433        & 347         &       &  \\
+        \hline
+        Mother Employment     &            &             &       &  \\
+        -Yes                  & 694        & 631         &       &  \\
+        - No                  & 92         & 71          &       &  \\
+        \hline
+        Father Employment     &            &             &       &  \\
+        - Yes                 & 355        & 364         &       &  \\
+        - No                  & 431        & 338         &       &  \\
+        \hline
+        Age Mother Finish Edu &            &             &       &  \\
+        - \textless{}16       & 24         & 83          &       &  \\
+        - 16-17               & 455        & 416         &       &  \\
+        - 18-20               & 224        & 152         &       &  \\
+        - \textgreater{}20    & 83         & 81          &       &  \\
+        \hline
+        Accommodation         &            &             &       &  \\
+        - Yes                 & 552        & 534         &       &  \\
+        - No                  & 234        & 168         &       &  \\
+        \hline
+        NNU Size              &            &             &       &  \\
+        - Large               & 552        & 505         &       &  \\
+        - Small               & 234        & 197         &       &  \\
+        \hline
+    \end{tabular}
+    \caption{Analysis of provided dataset for NNU's with and without CNS}
+    \label{tab:nnu-cns-analysis}
+\end{table}
+
+%% SECTION METHOD
+\section{Methods}\label{sec:method}
+To analyse the data, the R packages provided by 'tidyverse' are used throughout. Before any statistical methods are created, the data is factorised, to allow for consistency. Upon this data some exploratory analysis is performed to see if there is any obvious relationships that can be seen from the visualisations of continuous variables versus factor variables. Violin plots composed upon scatter plots are used to depict the true distributions behind them. See Figure \ref{img:bwt-gest} for a comparison of gestation period with birthweight, it is clear that there is positive correlation between the factors, in addition, readmission to the NNU correlates with a lower birthweight respectively to each gestation period.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/bwt.gest.png}
+    \caption{Gestation vs Birthweight for Re-admission. Purple - No readmission, Yellow - readmission}
+    \label{img:bwt-gest}
+\end{figure}
+
+\begin{figure}%
+    \centering
+    \subfloat[\centering Birthweight and Gender vs Re-admission]{{\includegraphics[width=0.4\textwidth]{images/bwt.gender.png} }}%
+    \qquad
+    \subfloat[\centering Length of Stay and Gender vs Re-admission]{{\includegraphics[width=0.4\textwidth]{images/los.gender.png} }}%
+    \caption{Birthweight and Length of Stay with Gender vs Re-admission. Outline : Blue - Male, Pink - Female}%
+    \label{fig:genders}%
+\end{figure}
+
+By creating an initial generalised linear model, based on the binomial distribution presented in Equation \ref{eq:binom}, which considers all variable interactions and transformations. Thus the `los` variable, total length of stay in hospital in $\log(\text{days})$ during the initial admission, is added into a secondary model to determine if these are identical. Which would prove how impactful the secondary post-birth response variable is on the overall model.
+\begin{align}\label{eq:binom}
+    &f(x,\pi) = \binom{n}{k} \pi^{x}(1-\pi)^{(n-x)} && x = 0,1,2,\dots,n. \\
+\end{align}
+Using the binomial distribution (from Eq.\ref{eq:binom}), and factoring the quantitative variables to form into dummy matrices, as in Equation \ref{eq:arr} and \ref{eq:mat}. Where $\textit{I}$ is the identity matrix.
+\begin{equation}\label{eq:arr}
+    X_{\text{gest}} =
+        \begin{bmatrix}
+            x_{1} & x_{2} & x_{3} & x_{4} & x_{5}
+        \end{bmatrix}
+\end{equation}
+
+\begin{equation}\label{eq:mat}
+    \Rightarrow X_{\text{gest}} = X_{1488\times 5} = \textit{I}
+\end{equation}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/glm.mod1.png}
+    \label{img:glm-mod1}
+    \caption{Preliminary GLM Model with 9 Covariates}
+\end{figure}
+After preparing the data for analysis, a regression model is run on the indepenent variables, excluding `re.ad` as the readmission variable because it is the response variable and also excluding `los` as it too is a post-birth response variable, and consider the interaction between variables
+After data preparation is complete, we first run a regression on all the independent variables except los and consider the interaction effects of all variables as follow:
+
+%% SECTION RESULTS
 \section{Results}\label{sec:results}
 Insert Results
 
-\section{Conclusions}\label{sec:conclusions
+%% SECTION CONCLUSIONS
+\section{Conclusions}\label{sec:conclusions}
 Insert Conclusions
 
 
