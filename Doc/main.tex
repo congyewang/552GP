@@ -1,7 +1,7 @@
-\documentclass[11pt]{article}
+\documentclass[10pt]{article}
 \usepackage{labreport}
 
-\title{The Influence of Multiple Variables on High-Risk Neonatal Survivors Based on the Quasi-Binomial Distribution  GLM Model}
+\title{Stepwise Binomial Regression Analysis of Neonatal Care Unit Readmission Covariates}
 % Authors
 \author{
   Wang, Congye\\
@@ -44,14 +44,14 @@ Investigating the covariate relationships for High Risk Neonatal Unit (NNU) re-a
 
 %% SECTION INTRODUCTION
 \section{Introduction}\label{sec:intro}
-Investigating the impact of  on high risk neonatal survivors within the first year of life, based on data-sets derived from \cite{langley2002impact}. In \cite{langley2002impact}, a total of 166 units (76\%) responded, and 120 (55\%) were willing to participate in research, and it stated that there were no consistent guidelines / definitions for what a CNS was. Henceforth, some guidelines were created to categorise units:
+Investigating the impact of  on high risk neonatal survivors within the first year of life, based on data-sets derived from \cite{langley2002impact}, and some statistics from that paper were influenced by \cite{mugford2001}. In this report a total of 166 units (76\%) responded, and 120 (55\%) were willing to participate in research, and it stated that there were no consistent guidelines / definitions for what a CNS was. Henceforth, some guidelines were created to categorise units:
 \begin{enumerate}\label{enum:CNS-types}
     \item Home visits offering nursing care and specialist advice for a minimum of five days a week for the first month after discharge from the Neonatal Unit (NNU)
     \item Ad-hoc advice to families until the infant was at least 12 months old
     \item A named nurse providing the link between primary and secondary health care services.
 \end{enumerate}
 
-From the initial data set, an random set of 1488 samples was extracted, considering a response variable (readmission) for 10 covariates (see table \ref{tab:nnu-cns-analysis} for 9 of the covariates, with total length of stay in hospital during initial admission not in this table). This data was collected from an 18 NNU subsample of \cite{langley2002impact}, with surveys sent to every mother who has visited within the previous 3 years. There was a total of 1488 responses, shown in Table \ref{tab:nnu-cns-analysis}
+From the initial data set, an random set of 1488 samples was extracted, considering a response variable (readmission) for 10 covariates (see table \ref{tab:nnu-cns-analysis} for 9 of the covariates, with total length of stay in hospital during initial admission not in this table). It is known that the economic impact of NNU readmission is high (\cite{petrou2001}, \cite{boyle1983})
 
 %% SECTION METHOD
 \section{Methods}\label{sec:method}
@@ -59,7 +59,7 @@ To analyse the data, the R packages provided by 'tidyverse' are used throughout.
 
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=0.7\textwidth]{images/bwt.gest.png}
+    \includegraphics[width=0.4\textwidth]{images/bwt.gest.png}
     \caption{Gestation vs Birthweight for Re-admission. Purple - No readmission, Yellow - readmission}
     \label{img:bwt-gest}
 \end{figure}
@@ -74,7 +74,7 @@ To analyse the data, the R packages provided by 'tidyverse' are used throughout.
 \end{figure}
 
 \begin{align}\label{eq:binom}
-    &f(x,\pi) = \binom{n}{k} \pi^{x}(1-\pi)^{(n-x)} && x = 0,1,2,\dots,n. \\
+    &f(x,\pi) = \binom{n}{k} \pi^{x}(1-\pi)^{(n-x)} && x = 0,1,2,\dots,n. 
 \end{align}
 Using the binomial distribution (from Eq.\ref{eq:binom}), and factoring the quantitative variables to form into dummy matrices, as in Equation \ref{eq:arr}. Where $\textit{I}$ is the identity matrix.
 \begin{equation}\label{eq:arr}
