@@ -1,4 +1,4 @@
-\documentclass[10pt]{article}
+\documentclass[11pt]{article}
 \usepackage{labreport}
 
 \title{Stepwise Binomial Regression Analysis of Neonatal Care Unit Readmission Covariates}
@@ -52,6 +52,37 @@ Investigating the impact of  on high risk neonatal survivors within the first ye
 \end{enumerate}
 
 From the initial data set, an random set of 1488 samples was extracted, considering a response variable (readmission) for 10 covariates (see table \ref{tab:nnu-cns-analysis} for 9 of the covariates, with total length of stay in hospital during initial admission not in this table). It is known that the economic impact of NNU readmission is high (\cite{petrou2001}, \cite{boyle1983})
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{|r|l|l|l|l|}
+        \hline
+        \multicolumn{2}{|c|}{\textbf{Categories}}                       & \textbf{NNU w/ CNS} & \textbf{NNU w/o CNS} \\ \hline
+        \multicolumn{2}{|c|}{n}                       & 702                 & 786                  \\ 
+        \multicolumn{2}{|c|}{Multi-Birth weight (g)}  & 1649.42             & 1743.20              \\ \hline
+        \multirow{4}{*}{Gestation} & \textless{}26  & 19                  & 25                   \\ 
+        & 26-29             & 191                 & 193                  \\ 
+        & 30-32             & 261                 & 239                  \\ 
+        & 33-36             & 209                 & 146                  \\
+        & \textgreater{}36  & 106                 & 99                   \\\hline 
+        \multirow{2}{*}{Gender} & Female            & 353                 & 355                  \\ 
+        & Male              & 433                 & 347                  \\ \hline
+        \multirow{2}{*}{Mother Employment} & Yes               & 694                 & 631                  \\ 
+        & No                & 92                  & 71                   \\ \hline
+        \multirow{2}{*}{Father Employment} & Yes               & 355                 & 364                  \\ 
+        & No                & 431                 & 338                  \\ \hline
+        \multirow{4}{*}{Mother Edu. Age} & \textless{}16     & 24                  & 83                   \\ 
+        & 16-17             & 455                 & 416                  \\ 
+        & 18-20             & 224                 & 152                  \\ 
+        & \textgreater{}20  & 83                  & 81                   \\ \hline
+        \multirow{2}{*}{Accomodation} & Yes               & 552                 & 534                  \\ 
+        & No                & 234                 & 168                  \\ \hline
+        \multirow{2}{*}{CNS Size} & Yes               & 552                 & 505                  \\ 
+        & No                & 234                 & 197                  \\ \hline
+    \end{tabular}
+    \caption{Covariate Values in Dataset}
+    \label{tab:nnu-cns-analysis}
+\end{table}
 
 %% SECTION METHOD
 \section{Methods}\label{sec:method}
@@ -200,6 +231,5 @@ Further analysis of the data could include:
 \renewcommand\bibname{References}
 \printbibliography
 
-\include{appendices/Appendix1}
 \end{document}
 
